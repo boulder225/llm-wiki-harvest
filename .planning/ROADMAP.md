@@ -64,7 +64,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- KnowledgeDoc model, client methods for knowledge/file download, exporter pipeline with progress
-- [ ] 03-02-PLAN.md -- Index.md generation, --skip-knowledge/--skip-files CLI flags, completion summary
+- [x] 03-02-PLAN.md -- Index.md generation, --skip-knowledge/--skip-files CLI flags, completion summary
 
 ## Progress
 

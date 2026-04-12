@@ -37,7 +37,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **OUT-01**: Output is organized in a structured folder hierarchy (`conversations/`, `knowledge/`, `files/`)
 - [x] **OUT-02**: Conversation filenames use `{date}_{sanitized-title}_{uuid[:8]}.md` format for sort order and collision avoidance
-- [ ] **OUT-03**: An `index.md` file is generated listing all conversations with dates and links
+- [x] **OUT-03**: An `index.md` file is generated listing all conversations with dates and links
 
 ### Resilience
 
@@ -95,7 +95,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-03 | Phase 3 | Complete |
 | OUT-01 | Phase 2 | Complete |
 | OUT-02 | Phase 2 | Complete |
-| OUT-03 | Phase 3 | Pending |
+| OUT-03 | Phase 3 | Complete |
 | RES-01 | Phase 1 | Complete |
 | RES-02 | Phase 2 | Complete |
 | RES-03 | Phase 2 | Complete |
