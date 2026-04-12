@@ -60,7 +60,11 @@ Plans:
   2. Running the tool produces a `files/` folder with all conversation file attachments downloaded (using variant fallback for different file types)
   3. An `index.md` file is generated listing all exported conversations with dates and links
   4. The complete output folder structure (`conversations/`, `knowledge/`, `files/`, `index.md`) is self-contained and navigable
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md -- KnowledgeDoc model, client methods for knowledge/file download, exporter pipeline with progress
+- [ ] 03-02-PLAN.md -- Index.md generation, --skip-knowledge/--skip-files CLI flags, completion summary
 
 ## Progress
 
@@ -71,4 +75,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. Auth and Project Discovery | 2/2 | Complete | 2026-04-12 |
 | 2. Conversation Export | 0/3 | Planned | - |
-| 3. Files, Knowledge, and Index | 0/? | Not started | - |
+| 3. Files, Knowledge, and Index | 0/2 | Planned | - |
