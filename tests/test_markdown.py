@@ -1,6 +1,12 @@
 """Tests for the Markdown rendering module."""
 
-from claude_dump.markdown import render_block, render_conversation, render_message
+from claude_dump.markdown import (
+    make_filename,
+    render_block,
+    render_conversation,
+    render_message,
+    sanitize_title,
+)
 from claude_dump.models import Attachment, ChatMessage, ContentBlock, Conversation
 
 
@@ -206,3 +212,71 @@ class TestRenderConversation:
         conv = self._make_conversation(name="My Great Chat")
         result = render_conversation(conv)
         assert "# My Great Chat" in result
+
+
+# ---------------------------------------------------------------------------
+# sanitize_title tests
+# ---------------------------------------------------------------------------
+
+
+class TestSanitizeTitle:
+    def test_normal_string(self):
+        assert sanitize_title("My Chat About Things") == "my-chat-about-things"
+
+    def test_special_characters(self):
+        assert sanitize_title("My Chat / About: Things!") == "my-chat-about-things"
+
+    def test_more_special_chars(self):
+        result = sanitize_title('a*b?c"d<e>f|g')
+        assert result == "abcdefg"
+
+    def test_empty_returns_untitled(self):
+        assert sanitize_title("") == "untitled"
+
+    def test_only_special_chars_returns_untitled(self):
+        assert sanitize_title("!!!???") == "untitled"
+
+    def test_truncates_to_100_chars(self):
+        long_title = "a" * 150
+        result = sanitize_title(long_title)
+        assert len(result) == 100
+
+    def test_collapses_consecutive_hyphens(self):
+        assert sanitize_title("a - - b --- c") == "a-b-c"
+
+    def test_strips_leading_trailing_hyphens(self):
+        assert sanitize_title(" - hello - ") == "hello"
+
+
+# ---------------------------------------------------------------------------
+# make_filename tests
+# ---------------------------------------------------------------------------
+
+
+class TestMakeFilename:
+    def test_correct_format(self):
+        conv = Conversation(
+            uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            name="My Chat",
+            created_at="2026-01-15T14:30:00Z",
+        )
+        result = make_filename(conv)
+        assert result == "2026-01-15_my-chat_a1b2c3d4.md"
+
+    def test_empty_name(self):
+        conv = Conversation(
+            uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            name="",
+            created_at="2026-01-15T14:30:00Z",
+        )
+        result = make_filename(conv)
+        assert result == "2026-01-15_untitled_a1b2c3d4.md"
+
+    def test_empty_created_at(self):
+        conv = Conversation(
+            uuid="a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            name="Test",
+            created_at="",
+        )
+        result = make_filename(conv)
+        assert result == "0000-00-00_test_a1b2c3d4.md"
