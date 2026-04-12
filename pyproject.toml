@@ -1,0 +1,29 @@
+[project]
+name = "claude-dump"
+version = "0.1.0"
+description = "Export Claude.ai project conversations and files to local Markdown"
+readme = "README.md"
+authors = [
+    { name = "boulder225", email = "mariotti.enrico@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28,<0.29",
+    "click>=8.3,<9",
+    "rich>=15,<16",
+    "pydantic>=2.12,<3",
+]
+
+[project.scripts]
+claude-dump = "claude_dump.cli:main"
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "pytest",
+    "pytest-httpx",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
