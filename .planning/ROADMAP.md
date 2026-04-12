@@ -49,7 +49,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Pydantic models for conversations/messages, API client methods with pagination
 - [x] 02-02-PLAN.md -- Markdown renderer for all content block types, filename sanitization
-- [ ] 02-03-PLAN.md -- Exporter pipeline with write-as-you-go, CLI wiring with Rich progress
+- [x] 02-03-PLAN.md -- Exporter pipeline with write-as-you-go, CLI wiring with Rich progress
 
 ### Phase 3: Files, Knowledge, and Index
 **Goal**: Users get a complete project export including all knowledge documents, file attachments, and a navigable index

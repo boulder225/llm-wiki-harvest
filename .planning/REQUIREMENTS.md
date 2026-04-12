@@ -35,15 +35,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Output Structure
 
-- [ ] **OUT-01**: Output is organized in a structured folder hierarchy (`conversations/`, `knowledge/`, `files/`)
+- [x] **OUT-01**: Output is organized in a structured folder hierarchy (`conversations/`, `knowledge/`, `files/`)
 - [x] **OUT-02**: Conversation filenames use `{date}_{sanitized-title}_{uuid[:8]}.md` format for sort order and collision avoidance
 - [ ] **OUT-03**: An `index.md` file is generated listing all conversations with dates and links
 
 ### Resilience
 
 - [x] **RES-01**: Tool handles rate limiting with exponential backoff on HTTP 429/529
-- [ ] **RES-02**: Tool shows progress indication during export (conversation counter)
-- [ ] **RES-03**: Tool uses write-as-you-go pattern (persist each conversation immediately, don't buffer all in memory)
+- [x] **RES-02**: Tool shows progress indication during export (conversation counter)
+- [x] **RES-03**: Tool uses write-as-you-go pattern (persist each conversation immediately, don't buffer all in memory)
 - [x] **RES-04**: Tool detects session expiry mid-export and halts with a clear message
 
 ## v2 Requirements
@@ -93,12 +93,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-01 | Phase 3 | Pending |
 | FILE-02 | Phase 3 | Pending |
 | FILE-03 | Phase 3 | Pending |
-| OUT-01 | Phase 2 | Pending |
+| OUT-01 | Phase 2 | Complete |
 | OUT-02 | Phase 2 | Complete |
 | OUT-03 | Phase 3 | Pending |
 | RES-01 | Phase 1 | Complete |
-| RES-02 | Phase 2 | Pending |
-| RES-03 | Phase 2 | Pending |
+| RES-02 | Phase 2 | Complete |
+| RES-03 | Phase 2 | Complete |
 | RES-04 | Phase 1 | Complete |
 
 **Coverage:**
