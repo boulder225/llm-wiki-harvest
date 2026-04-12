@@ -95,7 +95,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-03 | Phase 3 | Pending |
 | OUT-01 | Phase 2 | Pending |
 | OUT-02 | Phase 2 | Pending |
-| OUT-03 | Phase 4 | Pending |
+| OUT-03 | Phase 3 | Pending |
 | RES-01 | Phase 1 | Pending |
 | RES-02 | Phase 2 | Pending |
 | RES-03 | Phase 2 | Pending |
@@ -108,4 +108,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation*
