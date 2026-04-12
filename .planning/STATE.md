@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Completed 01-02-PLAN.md
+status: ready-to-plan
+stopped_at: Phase 01 complete, ready to plan Phase 02
 last_updated: "2026-04-12T12:00:18.609Z"
 last_activity: 2026-04-12
 progress:
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** Reliably dump every conversation and every attached file from a Claude.ai Project into organized, readable local Markdown files.
-**Current focus:** Phase 01 — auth-and-project-discovery
+**Current focus:** Phase 02 — conversation-export
 
 ## Current Position
 
 Phase: 2
 Plan: Not started
-Status: Phase complete — ready for verification
+Status: Ready to plan
 Last activity: 2026-04-12
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -76,12 +76,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- API is undocumented and may change without notice -- Phase 1 will validate assumptions against live API
-- Rate limit thresholds unknown -- must be conservative from the start
-- Session cookie TTL unknown -- empirical testing needed in Phase 1
+- API is undocumented and may change without notice -- Phase 1 validated core endpoints work
+- Rate limit thresholds unknown -- conservative backoff implemented (2s initial, doubling, max 5 retries)
+- Session cookie TTL unknown -- SessionExpiredError with friendly message implemented
 
 ## Session Continuity
 
-Last session: 2026-04-12T11:54:25.833Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-04-12
+Stopped at: Phase 01 complete, ready to plan Phase 02
 Resume file: None
