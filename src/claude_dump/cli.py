@@ -218,8 +218,8 @@ def dump(ctx: click.Context, project: str | None, output: str) -> None:
                 f"Selected project: {selected.name} ({selected.uuid})",
             )
 
-            # Export conversations to Markdown files
-            exported, failed = export_project(
+            # Export conversations, knowledge docs, and file attachments
+            result = export_project(
                 client=client,
                 project_uuid=selected.uuid,
                 project_name=selected.name,
@@ -227,16 +227,34 @@ def dump(ctx: click.Context, project: str | None, output: str) -> None:
             )
 
             # Print summary
-            if exported > 0:
+            if result.conversations_exported > 0:
                 console.print(
-                    f"\n[bold green]Exported {exported} conversation(s)[/bold green] "
+                    f"\n[bold green]Exported {result.conversations_exported} conversation(s)[/bold green] "
                     f"to {output}/conversations/",
                 )
-            if failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {failed} conversation(s) failed to export.",
+            if result.knowledge_exported > 0:
+                console.print(
+                    f"[bold green]Downloaded {result.knowledge_exported} knowledge file(s)[/bold green] "
+                    f"to {output}/knowledge/",
                 )
-            if exported == 0 and failed == 0:
+            if result.files_exported > 0:
+                console.print(
+                    f"[bold green]Downloaded {result.files_exported} file attachment(s)[/bold green] "
+                    f"to {output}/files/",
+                )
+            if result.conversations_failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {result.conversations_failed} conversation(s) failed to export.",
+                )
+            if result.knowledge_failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {result.knowledge_failed} knowledge file(s) failed to download.",
+                )
+            if result.files_failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {result.files_failed} file attachment(s) failed to download.",
+                )
+            if result.conversations_exported == 0 and result.conversations_failed == 0:
                 console.print("No conversations found in this project.")
         finally:
             client.close()
