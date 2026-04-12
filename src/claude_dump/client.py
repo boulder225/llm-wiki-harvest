@@ -10,6 +10,7 @@ import httpx
 
 from claude_dump.models import (
     APIError,
+    Conversation,
     Organization,
     Project,
     RateLimitError,
@@ -119,6 +120,47 @@ class ClaudeAPIClient:
         resp = self._request("GET", f"/organizations/{self._org_id}/projects")
         items = _extract_list(resp.json())
         return [Project.model_validate(p) for p in items]
+
+    def list_conversations(self, project_uuid: str) -> list[Conversation]:
+        """GET /organizations/{org}/projects/{proj}/conversations_v2 -- paginated.
+
+        Fetches all conversations in a project, paginating with limit=100.
+        Returns Conversation objects with metadata only (no chat_messages).
+        """
+        self._require_org_id()
+        page_size = 100
+        offset = 0
+        all_conversations: list[Conversation] = []
+
+        while True:
+            resp = self._request(
+                "GET",
+                f"/organizations/{self._org_id}/projects/{project_uuid}"
+                f"/conversations_v2?limit={page_size}&offset={offset}",
+            )
+            items = _extract_list(resp.json())
+            all_conversations.extend(
+                Conversation.model_validate(item) for item in items
+            )
+
+            if len(items) < page_size:
+                break
+            offset += page_size
+
+        return all_conversations
+
+    def get_conversation(self, conversation_uuid: str) -> Conversation:
+        """GET /organizations/{org}/chat_conversations/{conv} -- full messages.
+
+        Returns a Conversation with populated chat_messages array.
+        """
+        self._require_org_id()
+        resp = self._request(
+            "GET",
+            f"/organizations/{self._org_id}/chat_conversations/{conversation_uuid}"
+            f"?tree=True&rendering_mode=messages&render_all_tools=true",
+        )
+        return Conversation.model_validate(resp.json())
 
     # -- internal request with retry/backoff --------------------------------
 
