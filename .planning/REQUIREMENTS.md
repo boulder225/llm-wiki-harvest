@@ -21,11 +21,11 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Conversation Export
 
 - [x] **CONV-01**: Tool fetches all conversations within the selected project (with pagination support)
-- [ ] **CONV-02**: Each conversation is exported as a well-formatted Markdown file with sender labels and timestamps
-- [ ] **CONV-03**: Thinking/reasoning blocks are rendered in the Markdown output
-- [ ] **CONV-04**: Tool use and tool result blocks are rendered in code fences
-- [ ] **CONV-05**: Artifact references are replaced with clear placeholder text (content stripped server-side)
-- [ ] **CONV-06**: Conversation summary is included in the Markdown header when available
+- [x] **CONV-02**: Each conversation is exported as a well-formatted Markdown file with sender labels and timestamps
+- [x] **CONV-03**: Thinking/reasoning blocks are rendered in the Markdown output
+- [x] **CONV-04**: Tool use and tool result blocks are rendered in code fences
+- [x] **CONV-05**: Artifact references are replaced with clear placeholder text (content stripped server-side)
+- [x] **CONV-06**: Conversation summary is included in the Markdown header when available
 
 ### File Downloads
 
@@ -36,7 +36,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Output Structure
 
 - [ ] **OUT-01**: Output is organized in a structured folder hierarchy (`conversations/`, `knowledge/`, `files/`)
-- [ ] **OUT-02**: Conversation filenames use `{date}_{sanitized-title}_{uuid[:8]}.md` format for sort order and collision avoidance
+- [x] **OUT-02**: Conversation filenames use `{date}_{sanitized-title}_{uuid[:8]}.md` format for sort order and collision avoidance
 - [ ] **OUT-03**: An `index.md` file is generated listing all conversations with dates and links
 
 ### Resilience
@@ -85,16 +85,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROJ-01 | Phase 1 | Complete |
 | PROJ-02 | Phase 1 | Complete |
 | CONV-01 | Phase 2 | Complete |
-| CONV-02 | Phase 2 | Pending |
-| CONV-03 | Phase 2 | Pending |
-| CONV-04 | Phase 2 | Pending |
-| CONV-05 | Phase 2 | Pending |
-| CONV-06 | Phase 2 | Pending |
+| CONV-02 | Phase 2 | Complete |
+| CONV-03 | Phase 2 | Complete |
+| CONV-04 | Phase 2 | Complete |
+| CONV-05 | Phase 2 | Complete |
+| CONV-06 | Phase 2 | Complete |
 | FILE-01 | Phase 3 | Pending |
 | FILE-02 | Phase 3 | Pending |
 | FILE-03 | Phase 3 | Pending |
 | OUT-01 | Phase 2 | Pending |
-| OUT-02 | Phase 2 | Pending |
+| OUT-02 | Phase 2 | Complete |
 | OUT-03 | Phase 3 | Pending |
 | RES-01 | Phase 1 | Complete |
 | RES-02 | Phase 2 | Pending |
