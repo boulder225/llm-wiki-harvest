@@ -67,6 +67,16 @@ class FileRef(BaseModel):
     file_kind: str = ""
 
 
+class KnowledgeDoc(BaseModel):
+    """Knowledge document from GET /api/organizations/{org}/projects/{proj}/docs."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    uuid: str = ""
+    file_name: str = ""
+    content: str = ""
+
+
 class ChatMessage(BaseModel):
     """A single message in a conversation (human or assistant turn)."""
 

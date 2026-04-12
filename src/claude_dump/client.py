@@ -11,6 +11,7 @@ import httpx
 from claude_dump.models import (
     APIError,
     Conversation,
+    KnowledgeDoc,
     Organization,
     Project,
     RateLimitError,
@@ -161,6 +162,61 @@ class ClaudeAPIClient:
             f"?tree=True&rendering_mode=messages&render_all_tools=true",
         )
         return Conversation.model_validate(resp.json())
+
+    def list_knowledge_docs(self, project_uuid: str) -> list[KnowledgeDoc]:
+        """GET /organizations/{org}/projects/{proj}/docs -- knowledge documents."""
+        self._require_org_id()
+        resp = self._request(
+            "GET",
+            f"/organizations/{self._org_id}/projects/{project_uuid}/docs",
+        )
+        items = _extract_list(resp.json())
+        return [KnowledgeDoc.model_validate(d) for d in items]
+
+    def download_file(self, file_uuid: str, variant: str) -> bytes:
+        """GET /{org}/files/{file_uuid}/{variant} -- download binary file data.
+
+        Note: file download URLs use ``/api/{org}/`` NOT ``/api/organizations/{org}/``.
+        Since base_url is ``https://claude.ai/api``, the path is ``/{org}/files/...``.
+        """
+        self._require_org_id()
+        resp = self._request(
+            "GET",
+            f"/{self._org_id}/files/{file_uuid}/{variant}",
+        )
+        return resp.content
+
+    def download_file_with_fallback(
+        self, file_uuid: str, file_kind: str
+    ) -> bytes | None:
+        """Download a file trying variant fallback based on file_kind.
+
+        Returns the binary content on success, or ``None`` if all variants fail.
+        Re-raises ``SessionExpiredError`` and ``RateLimitError`` immediately.
+        """
+        if "image" in file_kind:
+            variants = ["preview", "thumbnail"]
+        elif "document" in file_kind or "pdf" in file_kind:
+            variants = ["document_pdf"]
+        else:
+            variants = ["document_pdf", "preview", "thumbnail"]
+
+        for variant in variants:
+            try:
+                return self.download_file(file_uuid, variant)
+            except SessionExpiredError:
+                raise
+            except RateLimitError:
+                raise
+            except APIError as exc:
+                if exc.status_code == 404:
+                    continue
+                # Other non-retryable API errors -- try next variant
+                continue
+            except Exception:  # noqa: BLE001
+                continue
+
+        return None
 
     # -- internal request with retry/backoff --------------------------------
 
