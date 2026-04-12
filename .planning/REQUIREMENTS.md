@@ -9,14 +9,14 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can authenticate using a manually provided session cookie (via CLI arg, env var, or interactive prompt)
-- [ ] **AUTH-02**: Tool discovers organization ID from cookie or `/api/organizations` endpoint
-- [ ] **AUTH-03**: Tool validates session cookie before starting export (detect expired/invalid cookies early)
+- [x] **AUTH-01**: User can authenticate using a manually provided session cookie (via CLI arg, env var, or interactive prompt)
+- [x] **AUTH-02**: Tool discovers organization ID from cookie or `/api/organizations` endpoint
+- [x] **AUTH-03**: Tool validates session cookie before starting export (detect expired/invalid cookies early)
 
 ### Project Discovery
 
-- [ ] **PROJ-01**: User can list all projects in their Claude.ai account
-- [ ] **PROJ-02**: User can select a project to export (interactive prompt or `--project` flag)
+- [x] **PROJ-01**: User can list all projects in their Claude.ai account
+- [x] **PROJ-02**: User can select a project to export (interactive prompt or `--project` flag)
 
 ### Conversation Export
 
@@ -79,11 +79,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| PROJ-01 | Phase 1 | Pending |
-| PROJ-02 | Phase 1 | Pending |
+| AUTH-01 | Phase 1 | Complete |
+| AUTH-02 | Phase 1 | Complete |
+| AUTH-03 | Phase 1 | Complete |
+| PROJ-01 | Phase 1 | Complete |
+| PROJ-02 | Phase 1 | Complete |
 | CONV-01 | Phase 2 | Pending |
 | CONV-02 | Phase 2 | Pending |
 | CONV-03 | Phase 2 | Pending |
