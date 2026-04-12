@@ -15,7 +15,7 @@ from rich.progress import (
 )
 
 from claude_dump.markdown import make_filename, render_conversation
-from claude_dump.models import FileRef, SessionExpiredError
+from claude_dump.models import Conversation, FileRef, SessionExpiredError
 
 if TYPE_CHECKING:
     from claude_dump.client import ClaudeAPIClient
@@ -225,4 +225,88 @@ def export_project(
                 finally:
                     progress.advance(file_task)
 
+    # Generate index.md after all exports complete (D-15)
+    generate_index(output_path, conversations, result)
+
     return result
+
+
+def generate_index(
+    output_dir: str | Path,
+    conversations: list[Conversation],
+    result: ExportResult,
+) -> None:
+    """Create an index.md file summarising the export.
+
+    Args:
+        output_dir: Root output directory.
+        conversations: Conversation metadata list (from list_conversations).
+        result: Export counts for all three stages.
+    """
+    from datetime import date
+
+    output_path = Path(output_dir)
+
+    # Sort conversations newest-first (D-12)
+    sorted_convs = sorted(conversations, key=lambda c: c.created_at or "", reverse=True)
+
+    lines: list[str] = [
+        "# Project Export Index",
+        "",
+        f"**Exported:** {date.today().isoformat()}",
+        "",
+        "| Category | Count |",
+        "|----------|-------|",
+        f"| Conversations | {result.conversations_exported} |",
+        f"| Knowledge files | {result.knowledge_exported} |",
+        f"| File attachments | {result.files_exported} |",
+        "",
+        "## Conversations",
+        "",
+        "| Date | Title | Link |",
+        "|------|-------|------|",
+    ]
+
+    for conv in sorted_convs:
+        conv_date = conv.created_at[:10] if conv.created_at else "Unknown"
+        title = conv.name or "Untitled"
+        link = f"conversations/{make_filename(conv)}"
+        lines.append(f"| {conv_date} | {title} | [Open]({link}) |")
+
+    lines.append("")
+
+    # Knowledge files section (D-14)
+    lines.append("## Knowledge Files")
+    lines.append("")
+    knowledge_dir = output_path / "knowledge"
+    if knowledge_dir.is_dir():
+        knowledge_files = sorted(f.name for f in knowledge_dir.iterdir() if f.is_file())
+    else:
+        knowledge_files = []
+
+    if knowledge_files:
+        for fname in knowledge_files:
+            lines.append(f"- [{fname}](knowledge/{fname})")
+    else:
+        lines.append("No knowledge files exported.")
+
+    lines.append("")
+
+    # File attachments section
+    lines.append("## File Attachments")
+    lines.append("")
+    files_dir = output_path / "files"
+    if files_dir.is_dir():
+        attachment_files = sorted(f.name for f in files_dir.iterdir() if f.is_file())
+    else:
+        attachment_files = []
+
+    if attachment_files:
+        for fname in attachment_files:
+            lines.append(f"- [{fname}](files/{fname})")
+    else:
+        lines.append("No file attachments exported.")
+
+    lines.append("")
+
+    (output_path / "index.md").write_text("\n".join(lines), encoding="utf-8")
