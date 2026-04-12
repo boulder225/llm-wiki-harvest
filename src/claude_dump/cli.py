@@ -11,7 +11,7 @@ from rich.table import Table
 
 from claude_dump.client import ClaudeAPIClient
 from claude_dump.config import resolve_cookie, resolve_org_id, resolve_project_uuid
-from claude_dump.exporter import export_project
+from claude_dump.exporter import ExportResult, export_project
 from claude_dump.models import (
     APIError,
     Organization,
@@ -177,8 +177,10 @@ def list_projects_cmd(ctx: click.Context) -> None:
 @main.command()
 @click.option("--project", default=None, help="Project UUID to export")
 @click.option("--output", "-o", default=".", help="Output directory", type=click.Path())
+@click.option("--skip-knowledge", is_flag=True, help="Skip downloading knowledge files")
+@click.option("--skip-files", is_flag=True, help="Skip downloading file attachments")
 @click.pass_context
-def dump(ctx: click.Context, project: str | None, output: str) -> None:
+def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: bool, skip_files: bool) -> None:
     """Export a Claude.ai project's conversations and files."""
     verbose: bool = ctx.obj["verbose"]
     try:
@@ -224,38 +226,45 @@ def dump(ctx: click.Context, project: str | None, output: str) -> None:
                 project_uuid=selected.uuid,
                 project_name=selected.name,
                 output_dir=output,
+                skip_knowledge=skip_knowledge,
+                skip_files=skip_files,
             )
 
             # Print summary
+            console.print()  # blank line
             if result.conversations_exported > 0:
                 console.print(
-                    f"\n[bold green]Exported {result.conversations_exported} conversation(s)[/bold green] "
+                    f"[bold green]Exported {result.conversations_exported} conversation(s)[/bold green] "
                     f"to {output}/conversations/",
+                )
+            if result.conversations_failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {result.conversations_failed} conversation(s) failed to export.",
                 )
             if result.knowledge_exported > 0:
                 console.print(
                     f"[bold green]Downloaded {result.knowledge_exported} knowledge file(s)[/bold green] "
                     f"to {output}/knowledge/",
                 )
+            if result.knowledge_failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {result.knowledge_failed} knowledge file(s) failed to download.",
+                )
             if result.files_exported > 0:
                 console.print(
                     f"[bold green]Downloaded {result.files_exported} file attachment(s)[/bold green] "
                     f"to {output}/files/",
                 )
-            if result.conversations_failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {result.conversations_failed} conversation(s) failed to export.",
-                )
-            if result.knowledge_failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {result.knowledge_failed} knowledge file(s) failed to download.",
-                )
             if result.files_failed > 0:
                 err_console.print(
                     f"[yellow]Warning:[/yellow] {result.files_failed} file attachment(s) failed to download.",
                 )
-            if result.conversations_exported == 0 and result.conversations_failed == 0:
-                console.print("No conversations found in this project.")
+
+            total = result.conversations_exported + result.knowledge_exported + result.files_exported
+            if total == 0:
+                console.print("No content found in this project.")
+            else:
+                console.print(f"\n[bold]Index written to {output}/index.md[/bold]")
         finally:
             client.close()
     except (SessionExpiredError, RateLimitError, APIError, KeyboardInterrupt) as e:
