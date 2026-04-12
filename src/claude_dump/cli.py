@@ -11,6 +11,7 @@ from rich.table import Table
 
 from claude_dump.client import ClaudeAPIClient
 from claude_dump.config import resolve_cookie, resolve_org_id, resolve_project_uuid
+from claude_dump.exporter import export_project
 from claude_dump.models import (
     APIError,
     Organization,
@@ -216,7 +217,27 @@ def dump(ctx: click.Context, project: str | None, output: str) -> None:
             console.print(
                 f"Selected project: {selected.name} ({selected.uuid})",
             )
-            # Export logic will be implemented in Phase 2
+
+            # Export conversations to Markdown files
+            exported, failed = export_project(
+                client=client,
+                project_uuid=selected.uuid,
+                project_name=selected.name,
+                output_dir=output,
+            )
+
+            # Print summary
+            if exported > 0:
+                console.print(
+                    f"\n[bold green]Exported {exported} conversation(s)[/bold green] "
+                    f"to {output}/conversations/",
+                )
+            if failed > 0:
+                err_console.print(
+                    f"[yellow]Warning:[/yellow] {failed} conversation(s) failed to export.",
+                )
+            if exported == 0 and failed == 0:
+                console.print("No conversations found in this project.")
         finally:
             client.close()
     except (SessionExpiredError, RateLimitError, APIError, KeyboardInterrupt) as e:
