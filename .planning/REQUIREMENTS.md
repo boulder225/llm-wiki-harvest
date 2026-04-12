@@ -41,10 +41,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Resilience
 
-- [ ] **RES-01**: Tool handles rate limiting with exponential backoff on HTTP 429/529
+- [x] **RES-01**: Tool handles rate limiting with exponential backoff on HTTP 429/529
 - [ ] **RES-02**: Tool shows progress indication during export (conversation counter)
 - [ ] **RES-03**: Tool uses write-as-you-go pattern (persist each conversation immediately, don't buffer all in memory)
-- [ ] **RES-04**: Tool detects session expiry mid-export and halts with a clear message
+- [x] **RES-04**: Tool detects session expiry mid-export and halts with a clear message
 
 ## v2 Requirements
 
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OUT-01 | Phase 2 | Pending |
 | OUT-02 | Phase 2 | Pending |
 | OUT-03 | Phase 3 | Pending |
-| RES-01 | Phase 1 | Pending |
+| RES-01 | Phase 1 | Complete |
 | RES-02 | Phase 2 | Pending |
 | RES-03 | Phase 2 | Pending |
-| RES-04 | Phase 1 | Pending |
+| RES-04 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 21 total

@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Project scaffold, Pydantic models, API client with retry/backoff
+- [x] 01-01-PLAN.md -- Project scaffold, Pydantic models, API client with retry/backoff
 - [ ] 01-02-PLAN.md -- Cookie config, CLI entry point, auth validation, project selection
 
 ### Phase 2: Conversation Export
