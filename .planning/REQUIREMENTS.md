@@ -20,7 +20,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Conversation Export
 
-- [ ] **CONV-01**: Tool fetches all conversations within the selected project (with pagination support)
+- [x] **CONV-01**: Tool fetches all conversations within the selected project (with pagination support)
 - [ ] **CONV-02**: Each conversation is exported as a well-formatted Markdown file with sender labels and timestamps
 - [ ] **CONV-03**: Thinking/reasoning blocks are rendered in the Markdown output
 - [ ] **CONV-04**: Tool use and tool result blocks are rendered in code fences
@@ -84,7 +84,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-03 | Phase 1 | Complete |
 | PROJ-01 | Phase 1 | Complete |
 | PROJ-02 | Phase 1 | Complete |
-| CONV-01 | Phase 2 | Pending |
+| CONV-01 | Phase 2 | Complete |
 | CONV-02 | Phase 2 | Pending |
 | CONV-03 | Phase 2 | Pending |
 | CONV-04 | Phase 2 | Pending |

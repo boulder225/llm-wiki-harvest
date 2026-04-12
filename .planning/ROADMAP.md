@@ -47,7 +47,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Pydantic models for conversations/messages, API client methods with pagination
+- [x] 02-01-PLAN.md -- Pydantic models for conversations/messages, API client methods with pagination
 - [ ] 02-02-PLAN.md -- Markdown renderer for all content block types, filename sanitization
 - [ ] 02-03-PLAN.md -- Exporter pipeline with write-as-you-go, CLI wiring with Rich progress
 
