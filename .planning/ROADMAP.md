@@ -28,7 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can select a project to export (interactively or via --project flag)
   4. Tool detects expired or invalid cookies and shows a clear error message instead of cryptic failures
   5. Tool handles HTTP 429/529 responses with retry/backoff instead of crashing
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md -- Project scaffold, Pydantic models, API client with retry/backoff
+- [ ] 01-02-PLAN.md -- Cookie config, CLI entry point, auth validation, project selection
 
 ### Phase 2: Conversation Export
 **Goal**: Users get every conversation in a selected project as well-formatted Markdown files on disk
@@ -60,6 +64,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth and Project Discovery | 0/? | Not started | - |
+| 1. Auth and Project Discovery | 0/2 | Planned | - |
 | 2. Conversation Export | 0/? | Not started | - |
 | 3. Files, Knowledge, and Index | 0/? | Not started | - |
