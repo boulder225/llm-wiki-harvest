@@ -29,9 +29,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### File Downloads
 
-- [ ] **FILE-01**: Tool downloads all project knowledge files to a `knowledge/` folder
-- [ ] **FILE-02**: Tool downloads file attachments from conversations to a `files/` folder
-- [ ] **FILE-03**: File download uses variant fallback strategy (document_pdf, preview, thumbnail)
+- [x] **FILE-01**: Tool downloads all project knowledge files to a `knowledge/` folder
+- [x] **FILE-02**: Tool downloads file attachments from conversations to a `files/` folder
+- [x] **FILE-03**: File download uses variant fallback strategy (document_pdf, preview, thumbnail)
 
 ### Output Structure
 
@@ -90,9 +90,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONV-04 | Phase 2 | Complete |
 | CONV-05 | Phase 2 | Complete |
 | CONV-06 | Phase 2 | Complete |
-| FILE-01 | Phase 3 | Pending |
-| FILE-02 | Phase 3 | Pending |
-| FILE-03 | Phase 3 | Pending |
+| FILE-01 | Phase 3 | Complete |
+| FILE-02 | Phase 3 | Complete |
+| FILE-03 | Phase 3 | Complete |
 | OUT-01 | Phase 2 | Complete |
 | OUT-02 | Phase 2 | Complete |
 | OUT-03 | Phase 3 | Pending |
