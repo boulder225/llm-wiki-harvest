@@ -12,12 +12,10 @@ Reliably dump every conversation and every attached file from a Claude.ai Projec
 
 ### Validated
 
-(None yet -- ship to validate)
+- [x] Authenticate to Claude.ai API using a manually provided session cookie — Validated in Phase 1: auth-and-project-discovery
+- [x] List and select Claude.ai Projects from the user's account — Validated in Phase 1: auth-and-project-discovery
 
 ### Active
-
-- [ ] Authenticate to Claude.ai API using a manually provided session cookie
-- [ ] List and select Claude.ai Projects from the user's account
 - [ ] Fetch all conversations within a selected Project
 - [ ] Export each conversation as a well-formatted Markdown file
 - [ ] Download files/transcripts attached to individual chats
