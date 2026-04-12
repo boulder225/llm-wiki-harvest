@@ -5,6 +5,7 @@ model objects into well-formatted Markdown strings.  No I/O, no HTTP calls.
 """
 
 import json
+import re
 
 from claude_dump.models import ChatMessage, ContentBlock, Conversation
 
@@ -116,3 +117,34 @@ def render_conversation(conv: Conversation) -> str:
     lines.append("\n\n---\n\n".join(messages))
 
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# Filename utilities
+# ---------------------------------------------------------------------------
+
+
+def sanitize_title(title: str) -> str:
+    """Convert a conversation title into a filesystem-safe slug.
+
+    Lowercase, hyphen-separated, alphanumeric + hyphens + underscores only.
+    Truncated to 100 characters.  Returns ``"untitled"`` for empty input.
+    """
+    result = title.lower()
+    result = result.replace(" ", "-")
+    result = re.sub(r"[^a-z0-9_-]", "", result)
+    result = re.sub(r"-{2,}", "-", result)
+    result = result.strip("-")
+    result = result[:100]
+    return result or "untitled"
+
+
+def make_filename(conv: Conversation) -> str:
+    """Generate a sort-friendly, collision-resistant Markdown filename.
+
+    Format: ``YYYY-MM-DD_sanitized-title_uuid8.md``
+    """
+    date = conv.created_at[:10] if conv.created_at else "0000-00-00"
+    sanitized = sanitize_title(conv.name)
+    short_uuid = conv.uuid[:8]
+    return f"{date}_{sanitized}_{short_uuid}.md"
