@@ -44,7 +44,12 @@ Plans:
   3. User sees a progress counter during export showing which conversation is being processed
   4. Each conversation is written to disk immediately (not buffered), so partial exports are usable if interrupted
   5. If the session expires mid-export, the tool halts with a clear message and the conversations already exported remain intact
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md -- Pydantic models for conversations/messages, API client methods with pagination
+- [ ] 02-02-PLAN.md -- Markdown renderer for all content block types, filename sanitization
+- [ ] 02-03-PLAN.md -- Exporter pipeline with write-as-you-go, CLI wiring with Rich progress
 
 ### Phase 3: Files, Knowledge, and Index
 **Goal**: Users get a complete project export including all knowledge documents, file attachments, and a navigable index
@@ -64,6 +69,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Auth and Project Discovery | 0/2 | Planned | - |
-| 2. Conversation Export | 0/? | Not started | - |
+| 1. Auth and Project Discovery | 2/2 | Complete | 2026-04-12 |
+| 2. Conversation Export | 0/3 | Planned | - |
 | 3. Files, Knowledge, and Index | 0/? | Not started | - |
