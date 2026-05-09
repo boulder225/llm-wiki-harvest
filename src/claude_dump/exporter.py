@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -33,6 +33,7 @@ class ExportResult:
     knowledge_failed: int = 0
     files_exported: int = 0
     files_failed: int = 0
+    exported_files: list[str] = field(default_factory=list)
 
 
 def _sanitize_filename(name: str) -> str:
@@ -70,16 +71,13 @@ def export_project(
         ExportResult with counts for all three stages.
     """
     output_path = Path(output_dir)
-    conv_dir = output_path / "conversations"
+    conv_dir = output_path
     conv_dir.mkdir(parents=True, exist_ok=True)
 
     if not skip_knowledge:
-        knowledge_dir = output_path / "knowledge"
-        knowledge_dir.mkdir(parents=True, exist_ok=True)
-
+        knowledge_dir = output_path
     if not skip_files:
-        files_dir = output_path / "files"
-        files_dir.mkdir(parents=True, exist_ok=True)
+        files_dir = output_path
 
     result = ExportResult()
 
@@ -135,6 +133,7 @@ def export_project(
                     filepath.write_text(markdown, encoding="utf-8")
 
                     result.conversations_exported += 1
+                    result.exported_files.append(filename)
                     manifest.record(conv_meta)
 
                 except SessionExpiredError:
@@ -246,6 +245,14 @@ def export_project(
     # Generate index.md after all exports complete (D-15)
     generate_index(output_path, conversations, result)
 
+    # Write delta file for downstream pipeline consumption
+    import json
+    delta_path = output_path / ".last-delta.json"
+    delta_path.write_text(
+        json.dumps({"exported_files": result.exported_files}, indent=2),
+        encoding="utf-8",
+    )
+
     return result
 
 
@@ -288,7 +295,7 @@ def generate_index(
     for conv in sorted_convs:
         conv_date = conv.created_at[:10] if conv.created_at else "Unknown"
         title = conv.name or "Untitled"
-        link = f"conversations/{make_filename(conv)}"
+        link = make_filename(conv)
         lines.append(f"| {conv_date} | {title} | [Open]({link}) |")
 
     lines.append("")
@@ -296,15 +303,14 @@ def generate_index(
     # Knowledge files section (D-14)
     lines.append("## Knowledge Files")
     lines.append("")
-    knowledge_dir = output_path / "knowledge"
-    if knowledge_dir.is_dir():
-        knowledge_files = sorted(f.name for f in knowledge_dir.iterdir() if f.is_file())
-    else:
-        knowledge_files = []
+    knowledge_files = sorted(
+        f.name for f in output_path.iterdir()
+        if f.is_file() and not f.name.endswith(".md") and not f.name.startswith(".")
+    )
 
     if knowledge_files:
         for fname in knowledge_files:
-            lines.append(f"- [{fname}](knowledge/{fname})")
+            lines.append(f"- [{fname}]({fname})")
     else:
         lines.append("No knowledge files exported.")
 
@@ -313,15 +319,14 @@ def generate_index(
     # File attachments section
     lines.append("## File Attachments")
     lines.append("")
-    files_dir = output_path / "files"
-    if files_dir.is_dir():
-        attachment_files = sorted(f.name for f in files_dir.iterdir() if f.is_file())
-    else:
-        attachment_files = []
+    attachment_files = sorted(
+        f.name for f in output_path.iterdir()
+        if f.is_file() and f.name.startswith(f"{f.name[:8]}_")
+    )
 
     if attachment_files:
         for fname in attachment_files:
-            lines.append(f"- [{fname}](files/{fname})")
+            lines.append(f"- [{fname}]({fname})")
     else:
         lines.append("No file attachments exported.")
 

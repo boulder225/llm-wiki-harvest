@@ -232,45 +232,50 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
                 full=full,
             )
 
-            # Print summary
-            console.print()  # blank line
-            if result.conversations_exported > 0:
-                console.print(
-                    f"[bold green]Exported {result.conversations_exported} conversation(s)[/bold green] "
-                    f"to {output}/conversations/",
+            # Print summary report
+            console.print()
+            console.print("[bold]Export Report[/bold]")
+            console.print(f"  Output: {output}")
+
+            table = Table(show_header=True, show_edge=False, pad_edge=False)
+            table.add_column("Category", style="bold")
+            table.add_column("Exported", justify="right", style="green")
+            table.add_column("Skipped", justify="right", style="dim")
+            table.add_column("Failed", justify="right", style="red")
+
+            table.add_row(
+                "Conversations",
+                str(result.conversations_exported),
+                str(result.conversations_skipped),
+                str(result.conversations_failed) if result.conversations_failed else "-",
+            )
+            if not skip_knowledge:
+                table.add_row(
+                    "Knowledge files",
+                    str(result.knowledge_exported),
+                    "-",
+                    str(result.knowledge_failed) if result.knowledge_failed else "-",
                 )
-            if result.conversations_skipped > 0:
-                console.print(
-                    f"[dim]Skipped {result.conversations_skipped} unchanged conversation(s)[/dim]",
+            if not skip_files:
+                table.add_row(
+                    "File attachments",
+                    str(result.files_exported),
+                    "-",
+                    str(result.files_failed) if result.files_failed else "-",
                 )
-            if result.conversations_failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {result.conversations_failed} conversation(s) failed to export.",
-                )
-            if result.knowledge_exported > 0:
-                console.print(
-                    f"[bold green]Downloaded {result.knowledge_exported} knowledge file(s)[/bold green] "
-                    f"to {output}/knowledge/",
-                )
-            if result.knowledge_failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {result.knowledge_failed} knowledge file(s) failed to download.",
-                )
-            if result.files_exported > 0:
-                console.print(
-                    f"[bold green]Downloaded {result.files_exported} file attachment(s)[/bold green] "
-                    f"to {output}/files/",
-                )
-            if result.files_failed > 0:
-                err_console.print(
-                    f"[yellow]Warning:[/yellow] {result.files_failed} file attachment(s) failed to download.",
-                )
+
+            console.print(table)
 
             total = result.conversations_exported + result.knowledge_exported + result.files_exported
             if total == 0:
-                console.print("No content found in this project.")
+                console.print("\nNo new content to export.")
             else:
-                console.print(f"\n[bold]Index written to {output}/index.md[/bold]")
+                console.print(f"\n[bold]Done.[/bold] Index: {output}/index.md")
+                if result.exported_files:
+                    console.print(f"Delta: {output}/.last-delta.json ({len(result.exported_files)} files)")
+                    console.print("\n[bold]New/updated files:[/bold]")
+                    for f in result.exported_files:
+                        console.print(f"  {f}")
         finally:
             client.close()
     except (SessionExpiredError, RateLimitError, APIError, KeyboardInterrupt) as e:
