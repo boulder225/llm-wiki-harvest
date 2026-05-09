@@ -179,8 +179,9 @@ def list_projects_cmd(ctx: click.Context) -> None:
 @click.option("--output", "-o", default=".", help="Output directory", type=click.Path())
 @click.option("--skip-knowledge", is_flag=True, help="Skip downloading knowledge files")
 @click.option("--skip-files", is_flag=True, help="Skip downloading file attachments")
+@click.option("--full", is_flag=True, help="Force full re-export, ignoring previous export state")
 @click.pass_context
-def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: bool, skip_files: bool) -> None:
+def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: bool, skip_files: bool, full: bool) -> None:
     """Export a Claude.ai project's conversations and files."""
     verbose: bool = ctx.obj["verbose"]
     try:
@@ -228,6 +229,7 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
                 output_dir=output,
                 skip_knowledge=skip_knowledge,
                 skip_files=skip_files,
+                full=full,
             )
 
             # Print summary
@@ -236,6 +238,10 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
                 console.print(
                     f"[bold green]Exported {result.conversations_exported} conversation(s)[/bold green] "
                     f"to {output}/conversations/",
+                )
+            if result.conversations_skipped > 0:
+                console.print(
+                    f"[dim]Skipped {result.conversations_skipped} unchanged conversation(s)[/dim]",
                 )
             if result.conversations_failed > 0:
                 err_console.print(
