@@ -14,6 +14,7 @@ from rich.progress import (
     TextColumn,
 )
 
+from claude_dump.manifest import ExportManifest
 from claude_dump.markdown import make_filename, render_conversation
 from claude_dump.models import Conversation, FileRef, SessionExpiredError
 
@@ -26,6 +27,7 @@ class ExportResult:
     """Counts for each stage of the export pipeline."""
 
     conversations_exported: int = 0
+    conversations_skipped: int = 0
     conversations_failed: int = 0
     knowledge_exported: int = 0
     knowledge_failed: int = 0
@@ -51,6 +53,7 @@ def export_project(
     output_dir: str | Path,
     skip_knowledge: bool = False,
     skip_files: bool = False,
+    full: bool = False,
 ) -> ExportResult:
     """Export all conversations, knowledge docs, and file attachments.
 
@@ -61,6 +64,7 @@ def export_project(
         output_dir: Root output directory.
         skip_knowledge: If True, skip knowledge file download.
         skip_files: If True, skip file attachment download.
+        full: If True, force full re-export ignoring manifest state.
 
     Returns:
         ExportResult with counts for all three stages.
@@ -82,6 +86,16 @@ def export_project(
     # Step 1: List all conversations (pagination handled by client)
     conversations = client.list_conversations(project_uuid)
 
+    # Step 2: Compute delta using manifest
+    manifest = ExportManifest.load(output_path)
+
+    if full:
+        to_export = conversations
+    else:
+        delta = manifest.compute_delta(conversations)
+        to_export = delta.new + delta.updated
+        result.conversations_skipped = len(delta.unchanged)
+
     # Collect unique file references for deduplication (D-05)
     all_file_refs: dict[str, FileRef] = {}
 
@@ -94,13 +108,13 @@ def export_project(
     ) as progress:
 
         # --- Stage 1: Conversations ---
-        if conversations:
+        if to_export:
             conv_task = progress.add_task(
                 f"Exporting {project_name}",
-                total=len(conversations),
+                total=len(to_export),
             )
 
-            for conv_meta in conversations:
+            for conv_meta in to_export:
                 progress.update(
                     conv_task,
                     description=f"Exporting: {conv_meta.name or 'Untitled'}",
@@ -121,6 +135,7 @@ def export_project(
                     filepath.write_text(markdown, encoding="utf-8")
 
                     result.conversations_exported += 1
+                    manifest.record(conv_meta)
 
                 except SessionExpiredError:
                     progress.stop()
@@ -131,6 +146,9 @@ def export_project(
 
                 finally:
                     progress.advance(conv_task)
+
+        # Save manifest after conversation stage completes
+        manifest.save()
 
         # --- Stage 2: Knowledge files (D-02, D-03, D-20, D-21) ---
         if not skip_knowledge:
