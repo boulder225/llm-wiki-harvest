@@ -81,8 +81,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- ExportManifest module with TDD (load/save/delta computation)
-- [ ] 04-02-PLAN.md -- Wire manifest into exporter pipeline, --full CLI flag, integration tests
+- [x] 04-01-PLAN.md -- ExportManifest module with TDD (load/save/delta computation)
+- [x] 04-02-PLAN.md -- Wire manifest into exporter pipeline, --full CLI flag, integration tests
 
 ## Progress
 
@@ -94,4 +94,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Auth and Project Discovery | 2/2 | Complete | 2026-04-12 |
 | 2. Conversation Export | 3/3 | Complete | 2026-04-12 |
 | 3. Files, Knowledge, and Index | 2/2 | Complete | 2026-04-12 |
-| 4. Incremental Delta Export Mode | 0/2 | Planned | - |
+| 4. Incremental Delta Export Mode | 2/2 | Complete | 2026-05-09 |
