@@ -15,6 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Auth and Project Discovery** - Authenticate via session cookie, discover orgs, list and select projects
 - [ ] **Phase 2: Conversation Export** - Fetch and render all conversations as Markdown with structured output
 - [ ] **Phase 3: Files, Knowledge, and Index** - Download all attached files, knowledge docs, and generate an index
+- [ ] **Phase 4: Incremental Delta Export Mode** - Skip already-exported conversations on re-run for dramatically faster repeat exports
 
 ## Phase Details
 
@@ -66,13 +67,31 @@ Plans:
 - [x] 03-01-PLAN.md -- KnowledgeDoc model, client methods for knowledge/file download, exporter pipeline with progress
 - [x] 03-02-PLAN.md -- Index.md generation, --skip-knowledge/--skip-files CLI flags, completion summary
 
+### Phase 4: Incremental delta export mode
+**Goal:** Users can re-run the tool on a previously exported project and only new/updated conversations are fetched, dramatically reducing export time on repeat runs
+**Depends on:** Phase 3
+**Requirements**: ENH-03
+**Success Criteria** (what must be TRUE):
+  1. Re-running dump on the same output directory skips conversations whose updated_at has not changed
+  2. New conversations (not previously exported) are always fetched and written
+  3. Updated conversations (updated_at changed) are re-exported, overwriting the existing file
+  4. User sees a count of skipped conversations in the output summary
+  5. --full flag forces a complete re-export ignoring previous state
+  6. First run (no manifest) exports everything and creates a .export-state.json manifest
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md -- ExportManifest module with TDD (load/save/delta computation)
+- [ ] 04-02-PLAN.md -- Wire manifest into exporter pipeline, --full CLI flag, integration tests
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Auth and Project Discovery | 2/2 | Complete | 2026-04-12 |
-| 2. Conversation Export | 0/3 | Planned | - |
-| 3. Files, Knowledge, and Index | 0/2 | Planned | - |
+| 2. Conversation Export | 3/3 | Complete | 2026-04-12 |
+| 3. Files, Knowledge, and Index | 2/2 | Complete | 2026-04-12 |
+| 4. Incremental Delta Export Mode | 0/2 | Planned | - |
