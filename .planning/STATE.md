@@ -90,6 +90,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 4 added: Incremental delta export mode
+- Phase 5 added: Fireflies API transcript import
 
 ### Pending Todos
 
