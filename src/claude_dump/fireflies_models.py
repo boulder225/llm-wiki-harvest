@@ -1,6 +1,11 @@
 """Pydantic models for Fireflies.ai GraphQL API responses and custom exceptions."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ---------------------------------------------------------------------------
@@ -25,6 +30,11 @@ class MeetingAttendee(BaseModel):
     displayName: str = ""
     email: str = ""
 
+    @field_validator("displayName", "email", mode="before")
+    @classmethod
+    def _coerce_str(cls, v: Any) -> str:
+        return "" if v is None else str(v)
+
 
 class Sentence(BaseModel):
     """A single sentence/utterance from the transcript."""
@@ -37,6 +47,16 @@ class Sentence(BaseModel):
     start_time: float = 0.0
     end_time: float = 0.0
 
+    @field_validator("speaker_name", "text", "raw_text", mode="before")
+    @classmethod
+    def _coerce_str(cls, v: Any) -> str:
+        return "" if v is None else str(v)
+
+    @field_validator("start_time", "end_time", mode="before")
+    @classmethod
+    def _coerce_float(cls, v: Any) -> float:
+        return 0.0 if v is None else float(v)
+
 
 class TranscriptSummary(BaseModel):
     """AI-generated summary fields from Fireflies transcript detail query."""
@@ -48,6 +68,46 @@ class TranscriptSummary(BaseModel):
     overview: str = ""
     shorthand_bullet: str = ""
     outline: str = ""
+
+    @field_validator("keywords", "action_items", mode="before")
+    @classmethod
+    def _coerce_list(cls, v: Any) -> list[str]:
+        if v is None:
+            return []
+        if isinstance(v, str):
+            # API sometimes returns a string instead of a list
+            return [v] if v.strip() else []
+        if isinstance(v, list):
+            return [str(item) for item in v if item is not None]
+        return []
+
+    @field_validator("overview", "shorthand_bullet", "outline", mode="before")
+    @classmethod
+    def _coerce_str(cls, v: Any) -> str:
+        return "" if v is None else str(v)
+
+
+def _coerce_date(v: Any) -> str:
+    """Coerce date from int (epoch ms), float, None, or string to ISO string."""
+    if v is None:
+        return ""
+    if isinstance(v, (int, float)):
+        return datetime.fromtimestamp(v / 1000, tz=UTC).isoformat()
+    return str(v)
+
+
+def _coerce_float(v: Any) -> float:
+    """Coerce None to 0.0, pass through numbers."""
+    if v is None:
+        return 0.0
+    return float(v)
+
+
+def _coerce_str(v: Any) -> str:
+    """Coerce None to empty string."""
+    if v is None:
+        return ""
+    return str(v)
 
 
 class FirefliesTranscript(BaseModel):
@@ -67,6 +127,21 @@ class FirefliesTranscript(BaseModel):
     sentences: list[Sentence] = Field(default_factory=list)
     summary: TranscriptSummary | None = None
 
+    @field_validator("date", mode="before")
+    @classmethod
+    def _coerce_date(cls, v: Any) -> str:
+        return _coerce_date(v)
+
+    @field_validator("duration", mode="before")
+    @classmethod
+    def _coerce_duration(cls, v: Any) -> float:
+        return _coerce_float(v)
+
+    @field_validator("transcript_url", "audio_url", "video_url", mode="before")
+    @classmethod
+    def _coerce_urls(cls, v: Any) -> str:
+        return _coerce_str(v)
+
 
 class FirefliesTranscriptSummaryItem(BaseModel):
     """Transcript list item from Fireflies GraphQL transcripts query.
@@ -82,6 +157,21 @@ class FirefliesTranscriptSummaryItem(BaseModel):
     duration: float = 0.0
     transcript_url: str = ""
     participants: list[str] = Field(default_factory=list)
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def _coerce_date(cls, v: Any) -> str:
+        return _coerce_date(v)
+
+    @field_validator("duration", mode="before")
+    @classmethod
+    def _coerce_duration(cls, v: Any) -> float:
+        return _coerce_float(v)
+
+    @field_validator("transcript_url", mode="before")
+    @classmethod
+    def _coerce_url(cls, v: Any) -> str:
+        return _coerce_str(v)
 
 
 # ---------------------------------------------------------------------------

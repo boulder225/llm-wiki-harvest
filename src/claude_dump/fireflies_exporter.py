@@ -33,12 +33,15 @@ class FirefliesExportResult:
 def export_fireflies_transcripts(
     client: FirefliesClient,
     output_dir: str | Path,
+    last: int | None = None,
+    verbose: bool = False,
 ) -> FirefliesExportResult:
-    """Export all Fireflies transcripts as Markdown files.
+    """Export Fireflies transcripts as Markdown files.
 
     Args:
         client: Authenticated Fireflies API client.
         output_dir: Directory to write Markdown files into.
+        last: If set, only export the N most recent transcripts.
 
     Returns:
         FirefliesExportResult with export counts.
@@ -53,6 +56,11 @@ def export_fireflies_transcripts(
 
     if not summaries:
         return result
+
+    # Step 1.5: Trim to most recent N if --last specified
+    if last is not None:
+        summaries.sort(key=lambda s: s.date or "", reverse=True)
+        summaries = summaries[:last]
 
     with Progress(
         SpinnerColumn(),
@@ -85,8 +93,12 @@ def export_fireflies_transcripts(
                 progress.stop()
                 raise
 
-            except Exception:  # noqa: BLE001
+            except Exception as exc:  # noqa: BLE001
                 result.transcripts_failed += 1
+                if verbose:
+                    import traceback
+                    progress.console.print(f"[red]Failed: {summary.title}: {exc}[/red]")
+                    traceback.print_exc()
 
             finally:
                 progress.advance(task)

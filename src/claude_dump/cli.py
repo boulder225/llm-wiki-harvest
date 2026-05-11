@@ -185,8 +185,10 @@ def list_projects_cmd(ctx: click.Context) -> None:
 @click.option("--skip-knowledge", is_flag=True, help="Skip downloading knowledge files")
 @click.option("--skip-files", is_flag=True, help="Skip downloading file attachments")
 @click.option("--full", is_flag=True, help="Force full re-export, ignoring previous export state")
+@click.option("--last", default=None, type=int, help="Also import the N most recent Fireflies transcripts")
+@click.option("--fireflies-api-key", default=None, help="Fireflies API key (or set FIREFLIES_API_KEY env var)")
 @click.pass_context
-def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: bool, skip_files: bool, full: bool) -> None:
+def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: bool, skip_files: bool, full: bool, last: int | None, fireflies_api_key: str | None) -> None:
     """Export a Claude.ai project's conversations and files."""
     verbose: bool = ctx.obj["verbose"]
     try:
@@ -237,7 +239,15 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
                 full=full,
             )
 
-            # Print summary report
+            # Fireflies import (if --last specified)
+            ff_result: FirefliesExportResult | None = None
+            if last is not None:
+                console.print("\nImporting Fireflies transcripts...")
+                ff_key = resolve_fireflies_api_key(fireflies_api_key)
+                with FirefliesClient(api_key=ff_key, verbose=verbose) as ff_client:
+                    ff_result = export_fireflies_transcripts(ff_client, output, last=last, verbose=verbose)
+
+            # Print combined report
             console.print()
             console.print("[bold]Export Report[/bold]")
             console.print(f"  Output: {output}")
@@ -268,23 +278,40 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
                     "-",
                     str(result.files_failed) if result.files_failed else "-",
                 )
+            if ff_result is not None:
+                table.add_row(
+                    "Fireflies transcripts",
+                    str(ff_result.transcripts_exported),
+                    "-",
+                    str(ff_result.transcripts_failed) if ff_result.transcripts_failed else "-",
+                )
 
             console.print(table)
 
+            all_files = list(result.exported_files or [])
+            if ff_result is not None:
+                all_files.extend(ff_result.exported_files)
+
             total = result.conversations_exported + result.knowledge_exported + result.files_exported
+            if ff_result is not None:
+                total += ff_result.transcripts_exported
+
             if total == 0:
                 console.print("\nNo new content to export.")
             else:
                 console.print(f"\n[bold]Done.[/bold] Index: {output}/index.md")
-                if result.exported_files:
-                    console.print(f"Delta: {output}/.last-delta.json ({len(result.exported_files)} files)")
+                if all_files:
+                    console.print(f"Delta: {output}/.last-delta.json ({len(result.exported_files or [])} files)")
                     console.print("\n[bold]New/updated files:[/bold]")
-                    for f in result.exported_files:
+                    for f in all_files:
                         console.print(f"  {f}")
         finally:
             client.close()
-    except (SessionExpiredError, RateLimitError, APIError, KeyboardInterrupt) as e:
-        _handle_error(e, verbose)
+    except (SessionExpiredError, RateLimitError, APIError, FirefliesAuthError, FirefliesAPIError, KeyboardInterrupt) as e:
+        if isinstance(e, (FirefliesAuthError, FirefliesAPIError)):
+            _handle_fireflies_error(e, verbose)
+        else:
+            _handle_error(e, verbose)
     except Exception as e:  # noqa: BLE001
         _handle_error(e, verbose)
 
@@ -357,14 +384,15 @@ def list_fireflies_cmd(ctx: click.Context, api_key: str | None) -> None:
 @main.command("import-fireflies")
 @click.option("--api-key", default=None, help="Fireflies API key")
 @click.option("--output", "-o", default=".", help="Output directory", type=click.Path())
+@click.option("--last", default=None, type=int, help="Import only the N most recent transcripts")
 @click.pass_context
-def import_fireflies_cmd(ctx: click.Context, api_key: str | None, output: str) -> None:
+def import_fireflies_cmd(ctx: click.Context, api_key: str | None, output: str, last: int | None) -> None:
     """Import Fireflies.ai transcripts as Markdown files."""
     verbose: bool = ctx.obj["verbose"]
     try:
         key = resolve_fireflies_api_key(api_key)
         with FirefliesClient(api_key=key, verbose=verbose) as client:
-            result = export_fireflies_transcripts(client, output)
+            result = export_fireflies_transcripts(client, output, last=last, verbose=verbose)
 
             # Print summary report
             console.print()
