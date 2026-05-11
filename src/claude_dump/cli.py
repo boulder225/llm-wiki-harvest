@@ -12,6 +12,11 @@ from rich.table import Table
 from claude_dump.client import ClaudeAPIClient
 from claude_dump.config import resolve_cookie, resolve_org_id, resolve_project_uuid
 from claude_dump.exporter import ExportResult, export_project
+from claude_dump.fireflies_client import FirefliesClient
+from claude_dump.fireflies_config import resolve_fireflies_api_key
+from claude_dump.fireflies_exporter import FirefliesExportResult, export_fireflies_transcripts
+from claude_dump.fireflies_markdown import format_timestamp
+from claude_dump.fireflies_models import FirefliesAPIError, FirefliesAuthError
 from claude_dump.models import (
     APIError,
     Organization,
@@ -282,3 +287,110 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
         _handle_error(e, verbose)
     except Exception as e:  # noqa: BLE001
         _handle_error(e, verbose)
+
+
+# ---------------------------------------------------------------------------
+# Fireflies commands
+# ---------------------------------------------------------------------------
+
+
+def _handle_fireflies_error(e: Exception, verbose: bool) -> None:
+    """Print a friendly error message for Fireflies commands and exit."""
+    if isinstance(e, FirefliesAuthError):
+        err_console.print(
+            "[bold red]Error:[/bold red] Fireflies API key is invalid. "
+            "Check your key at https://app.fireflies.ai/integrations",
+        )
+        sys.exit(1)
+    if isinstance(e, FirefliesAPIError):
+        err_console.print(
+            f"[bold red]Error:[/bold red] Fireflies API error (HTTP {e.status_code})",
+        )
+        if verbose:
+            err_console.print(e.response_body)
+        sys.exit(1)
+    if isinstance(e, KeyboardInterrupt):
+        err_console.print("\nAborted.")
+        sys.exit(130)
+    # Unexpected
+    err_console.print(f"[bold red]Unexpected error:[/bold red] {e}")
+    if verbose:
+        traceback.print_exc(file=sys.stderr)
+    sys.exit(1)
+
+
+@main.command("list-fireflies")
+@click.option("--api-key", default=None, help="Fireflies API key")
+@click.pass_context
+def list_fireflies_cmd(ctx: click.Context, api_key: str | None) -> None:
+    """List all transcripts in your Fireflies.ai account."""
+    verbose: bool = ctx.obj["verbose"]
+    try:
+        key = resolve_fireflies_api_key(api_key)
+        with FirefliesClient(api_key=key, verbose=verbose) as client:
+            transcripts = client.list_all_transcripts()
+
+            if not transcripts:
+                console.print("No transcripts found.")
+                return
+
+            table = Table(title="Fireflies Transcripts")
+            table.add_column("#", style="bold", width=4)
+            table.add_column("Title")
+            table.add_column("Date")
+            table.add_column("Duration")
+            table.add_column("Participants")
+
+            for idx, t in enumerate(transcripts, 1):
+                date = t.date[:10] if t.date else ""
+                duration = format_timestamp(t.duration)
+                participants = ", ".join(t.participants) if t.participants else ""
+                table.add_row(str(idx), t.title, date, duration, participants)
+
+            console.print(table)
+    except (FirefliesAuthError, FirefliesAPIError, KeyboardInterrupt) as e:
+        _handle_fireflies_error(e, verbose)
+    except Exception as e:  # noqa: BLE001
+        _handle_fireflies_error(e, verbose)
+
+
+@main.command("import-fireflies")
+@click.option("--api-key", default=None, help="Fireflies API key")
+@click.option("--output", "-o", default=".", help="Output directory", type=click.Path())
+@click.pass_context
+def import_fireflies_cmd(ctx: click.Context, api_key: str | None, output: str) -> None:
+    """Import Fireflies.ai transcripts as Markdown files."""
+    verbose: bool = ctx.obj["verbose"]
+    try:
+        key = resolve_fireflies_api_key(api_key)
+        with FirefliesClient(api_key=key, verbose=verbose) as client:
+            result = export_fireflies_transcripts(client, output)
+
+            # Print summary report
+            console.print()
+            console.print("[bold]Import Report[/bold]")
+            console.print(f"  Output: {output}")
+
+            table = Table(show_header=True, show_edge=False, pad_edge=False)
+            table.add_column("Category", style="bold")
+            table.add_column("Exported", justify="right", style="green")
+            table.add_column("Failed", justify="right", style="red")
+
+            table.add_row(
+                "Transcripts",
+                str(result.transcripts_exported),
+                str(result.transcripts_failed) if result.transcripts_failed else "-",
+            )
+            console.print(table)
+
+            if result.transcripts_exported > 0:
+                console.print(
+                    f"\n[bold]Done.[/bold] {result.transcripts_exported} "
+                    f"transcript(s) imported to {output}",
+                )
+            else:
+                console.print("\nNo transcripts found.")
+    except (FirefliesAuthError, FirefliesAPIError, KeyboardInterrupt) as e:
+        _handle_fireflies_error(e, verbose)
+    except Exception as e:  # noqa: BLE001
+        _handle_fireflies_error(e, verbose)
