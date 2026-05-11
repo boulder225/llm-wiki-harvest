@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Conversation Export** - Fetch and render all conversations as Markdown with structured output
 - [ ] **Phase 3: Files, Knowledge, and Index** - Download all attached files, knowledge docs, and generate an index
 - [ ] **Phase 4: Incremental Delta Export Mode** - Skip already-exported conversations on re-run for dramatically faster repeat exports
-- [ ] **Phase 5: Fireflies API Transcript Import** - Import meeting transcripts from Fireflies.ai as speaker-attributed Markdown
+- [x] **Phase 5: Fireflies API Transcript Import** - Import meeting transcripts from Fireflies.ai as speaker-attributed Markdown
 
 ## Phase Details
 
@@ -96,7 +96,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Conversation Export | 3/3 | Complete | 2026-04-12 |
 | 3. Files, Knowledge, and Index | 2/2 | Complete | 2026-04-12 |
 | 4. Incremental Delta Export Mode | 2/2 | Complete | 2026-05-09 |
-| 5. Fireflies API Transcript Import | 0/2 | Planned | - |
+| 5. Fireflies API Transcript Import | 2/2 | Complete | 2026-05-11 |
 
 ### Phase 5: Fireflies API transcript import
 
@@ -112,5 +112,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 **Plans:** 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- Fireflies Pydantic models, GraphQL client with retry/backoff, API key config
-- [ ] 05-02-PLAN.md -- Markdown renderer, exporter pipeline, list-fireflies and import-fireflies CLI commands
+- [x] 05-01-PLAN.md -- Fireflies Pydantic models, GraphQL client with retry/backoff, API key config
+- [x] 05-02-PLAN.md -- Markdown renderer, exporter pipeline, list-fireflies and import-fireflies CLI commands
