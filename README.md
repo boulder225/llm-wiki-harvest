@@ -1,6 +1,12 @@
-# claude-dump
+# llm-wiki-harvest
 
-A CLI tool that exports conversations and files from a **Claude.ai Project** into local Markdown, and imports **Fireflies.ai** meeting transcripts alongside them.
+A CLI tool that harvests conversations and meeting transcripts from AI platforms (Claude.ai, Fireflies.ai) into Markdown — designed to feed an [LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
+
+## Inspiration
+
+Andrej Karpathy proposed the idea of a personal wiki maintained by an LLM — a living knowledge base that ingests raw material (conversations, meetings, notes) and organizes it into structured, searchable knowledge. See [his original gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) and [balukosuri's implementation](https://github.com/balukosuri/llm-wiki-karpathy).
+
+This tool is the **harvester** — it pulls raw conversations and transcripts from upstream platforms and writes them as Markdown files ready for wiki ingestion.
 
 ## Features
 
@@ -76,26 +82,53 @@ claude-dump import-fireflies --last 5 --output ./raw
 claude-dump dump --project <UUID> --output ./raw --last 3
 ```
 
+### Example output
+
+```
+$ claude-dump dump --project <UUID> --output ./raw --last 1
+
+Using organization: user@example.com's Organization
+Selected project: My Project (019af253-...)
+
+Export Report
+  Output: ./raw
+Category             Exported   Skipped   Failed
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Conversations               0       156        -
+Knowledge files             0         -        -
+File attachments            0         -        -
+Fireflies transcripts       1         -        -
+
+Done. Index: ./raw/index.md
+Delta: ./raw/.last-delta.json (1 files)
+
+New/updated files:
+  2026-05-12-weekly-standup.md
+```
+
 ## Pipeline Integration
 
-The tool is designed to feed into downstream ingestion pipelines. After export:
+The tool is designed to feed into downstream ingestion pipelines (like an LLM Wiki). After export:
 
-1. **Export** — `claude-dump` writes Markdown files to an output directory
+1. **Harvest** — `claude-dump` writes Markdown files to an output directory
 2. **Delta** — `.last-delta.json` records which files were new/updated
-3. **Ingest** — a sync script picks up new files and feeds them to a wiki or knowledge base
+3. **Ingest** — a sync script picks up new files and feeds them to the wiki
 
-Example orchestration:
+Example orchestration (`sync.sh`):
 
 ```bash
-# Dump Claude conversations
-claude-dump dump --project $UUID --output ./raw
+#!/bin/bash
+set -e
 
-# Import Fireflies transcripts
+# Dump Claude conversations (incremental)
+claude-dump dump --project $PROJECT_UUID --output ./raw
+
+# Import recent Fireflies transcripts
 claude-dump import-fireflies --last $N --output ./raw
 
-# Ingest new files into wiki
+# Ingest new/updated files into the LLM wiki
 for f in $(new_files_from_delta); do
-  ingest "raw/$f"
+  wiki-ingest "raw/$f"
 done
 ```
 
@@ -127,4 +160,4 @@ uv run ruff check src/
 
 ## License
 
-Private project.
+MIT
