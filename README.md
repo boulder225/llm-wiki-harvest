@@ -44,6 +44,16 @@ export FIREFLIES_API_KEY="your-fireflies-api-key"
 
 Get your key at https://app.fireflies.ai/integrations.
 
+### Post-export hook
+
+Run a command for each exported file automatically:
+
+```bash
+export CLAUDE_DUMP_POST_CMD='~/run-claude-from-env.sh -p "ingest raw/{}"'
+```
+
+The `{}` placeholder is replaced with each exported filename. The command runs from the parent of the output directory. Can also be set in `.env`.
+
 ## Usage
 
 ### List Claude projects
@@ -112,9 +122,19 @@ The tool is designed to feed into downstream ingestion pipelines (like an LLM Wi
 
 1. **Harvest** — `claude-dump` writes Markdown files to an output directory
 2. **Delta** — `.last-delta.json` records which files were new/updated
-3. **Ingest** — a sync script picks up new files and feeds them to the wiki
+3. **Ingest** — post-export hook runs a command per new file
 
-Example orchestration (`sync.sh`):
+### Single-command pipeline
+
+Set `CLAUDE_DUMP_POST_CMD` in your `.env` and run everything in one shot:
+
+```bash
+claude-dump dump --project <UUID> --output ./raw --last 1
+```
+
+This exports conversations, imports Fireflies transcripts, and runs the ingest hook for each new file.
+
+### Manual orchestration (`sync.sh`)
 
 ```bash
 #!/bin/bash
