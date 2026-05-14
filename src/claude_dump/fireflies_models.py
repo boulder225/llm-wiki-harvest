@@ -21,6 +21,11 @@ class Speaker(BaseModel):
     id: str = ""
     name: str = ""
 
+    @field_validator("id", "name", mode="before")
+    @classmethod
+    def _coerce_str(cls, v: Any) -> str:
+        return "" if v is None else str(v)
+
 
 class MeetingAttendee(BaseModel):
     """Meeting attendee from Fireflies transcript detail query."""

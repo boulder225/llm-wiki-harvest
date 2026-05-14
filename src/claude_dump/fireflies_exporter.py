@@ -95,9 +95,9 @@ def export_fireflies_transcripts(
 
             except Exception as exc:  # noqa: BLE001
                 result.transcripts_failed += 1
+                progress.console.print(f"[red]Failed: {summary.title}: {exc}[/red]")
                 if verbose:
                     import traceback
-                    progress.console.print(f"[red]Failed: {summary.title}: {exc}[/red]")
                     traceback.print_exc()
 
             finally:

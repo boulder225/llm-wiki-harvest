@@ -292,6 +292,16 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
             if ff_result is not None:
                 all_files.extend(ff_result.exported_files)
 
+            # Rewrite delta to include Fireflies exported files
+            if ff_result is not None and ff_result.exported_files:
+                import json
+                from pathlib import Path
+                delta_path = Path(output) / ".last-delta.json"
+                delta_path.write_text(
+                    json.dumps({"exported_files": all_files}, indent=2),
+                    encoding="utf-8",
+                )
+
             total = result.conversations_exported + result.knowledge_exported + result.files_exported
             if ff_result is not None:
                 total += ff_result.transcripts_exported
@@ -301,10 +311,26 @@ def dump(ctx: click.Context, project: str | None, output: str, skip_knowledge: b
             else:
                 console.print(f"\n[bold]Done.[/bold] Index: {output}/index.md")
                 if all_files:
-                    console.print(f"Delta: {output}/.last-delta.json ({len(result.exported_files or [])} files)")
+                    console.print(f"Delta: {output}/.last-delta.json ({len(all_files)} files)")
                     console.print("\n[bold]New/updated files:[/bold]")
                     for f in all_files:
                         console.print(f"  {f}")
+
+            # Run post-export command if configured via env var or .env
+            import os
+            from claude_dump.config import _read_env_value
+            post_cmd = os.environ.get("CLAUDE_DUMP_POST_CMD") or _read_env_value("CLAUDE_DUMP_POST_CMD")
+            if post_cmd and all_files:
+                import subprocess
+                from pathlib import Path
+                cwd = str(Path(output).parent)
+                console.print(f"\n[bold]Running post-export command...[/bold]")
+                for filename in all_files:
+                    cmd = post_cmd.replace("{}", filename)
+                    console.print(f"  $ {cmd}")
+                    ret = subprocess.run(cmd, shell=True, cwd=cwd)  # noqa: S602
+                    if ret.returncode != 0:
+                        console.print(f"  [red]Command failed (exit {ret.returncode})[/red]")
         finally:
             client.close()
     except (SessionExpiredError, RateLimitError, APIError, FirefliesAuthError, FirefliesAPIError, KeyboardInterrupt) as e:
